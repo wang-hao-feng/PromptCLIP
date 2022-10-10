@@ -1,3 +1,4 @@
+from ast import arg
 import sys
 sys.path.append('..')
 
@@ -41,10 +42,13 @@ cfg = PromptConfig(train_length=args.train_length,
                    visual_prompt=args.visual_prompt, 
                    text_prompt=args.text_prompt, 
                    classifier=args.classifier, 
+                   optim=args.optimizer, 
                    batch_size=args.batch_size, 
                    learning_rate=args.learning_rate,
                    weight_decay=args.weight_decay, 
-                   momenton=args.momenton,  
+                   momentum=args.momentum,  
+                   betas=(args.beta1, args.beta2), 
+                   amsgrad=args.amsgrad, 
                    warmup=args.warmup, 
                    epoch=args.epoch, 
                    seed=args.seed)
@@ -56,7 +60,7 @@ clip_model, preprocess = clip.load('../ViT-B-16.pt', device)
 
 #init prompt_vit
 model = PromptCLIP(clip_model, visual_prompt=cfg.visual_prompt, text_prompt=cfg.text_prompt).to(device)
-#model.init_prompt(device)
+model.init_prompt(device)
 
 vcr_train = VCRDataset(split='train', 
                        task='qa', 
@@ -98,11 +102,11 @@ trainer = BaselineTrainer(cfg=cfg,
 name = ''
 name += f'vpt:{cfg.visual_prompt}_' if cfg.visual_prompt != 'none' else ''
 name += f'tpt:{cfg.text_prompt}_' if cfg.text_prompt != 'none' else ''
-name += f'lr:{cfg.lr}_wd:{cfg.wd}_{cfg.train_length}'
+name += f'lr:{cfg.lr}_wd:{cfg.wd}_{cfg.train_length}_{cfg.optim}'
 
 print('-' * 30)
 print(f'lr:{cfg.lr}   wd:{cfg.wd}   dataset_length:{cfg.train_length}')
-model.init_prompt(device)
+#model.init_prompt(device)
 wandb.init(project=f'prompt_clip', name=name)
 wandb.config = {
      'learning_rate': cfg.lr, 

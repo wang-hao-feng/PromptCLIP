@@ -115,7 +115,13 @@ class BaselineTrainer():
         self.evaluater = evaluater
         self.device = device
 
-        self.optimizer = make_optimizer(self.model, cfg.lr, cfg.wd, cfg.momenton)
+        self.optimizer = make_optimizer(model=self.model, 
+                                        lr=cfg.lr, 
+                                        weight_decky=cfg.wd, 
+                                        optim=cfg.optim, 
+                                        momentum=cfg.momentum, 
+                                        betas=cfg.betas, 
+                                        amsgrad=cfg.amsgrad)
         self.lr_scheduler = WarmupCosineSchedule(optimizer=self.optimizer, warmup_steps=cfg.warmup, t_total=cfg.epoch)
         self.loss_fn = nn.CrossEntropyLoss()
     
